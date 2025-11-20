@@ -1,11 +1,9 @@
-name: Docker CI/CD Deploy
+name: Git Pull Only Deploy
 
 on:
   push:
     branches:
       - main
-      - master
-      - dev
 
 jobs:
   deploy:
@@ -26,13 +24,13 @@ jobs:
       - name: Test SSH Connection
         run: |
           echo "Testing SSH to server..."
-          nc -vz ${{ secrets.SERVER_IP }} 22 || true
+          nc -vz ${{ secrets.SERVER_IP }} 65002 || true
 
-      # --- 4. Deploy ke server via SSH dengan Auto Rollback jika error & Migrasi Database ---
-      - name: Deploy to Server (with Migration & Rollback)
+      # --- 4. Deploy ke server via SSH (Git Pull Only) ---
+      - name: Deploy to Server (Git Pull Only)
         id: deploy_server
         run: |
-          ssh -p 22 -o StrictHostKeyChecking=no ${{ secrets.SERVER_USER }}@${{ secrets.SERVER_IP }} 'bash -s' <<'EOF'
+          ssh -p 65002 -o StrictHostKeyChecking=no ${{ secrets.SERVER_USER }}@${{ secrets.SERVER_IP }} 'bash -s' <<'EOF'
             set -e
             cd "${{ secrets.SERVER_PROJECT_PATH }}"
 
@@ -48,39 +46,7 @@ jobs:
             # Pull code
             git pull origin $GITHUB_REF_NAME
 
-            echo '📝 Menyimpan backup docker sebelum update...'
-            docker compose config > /tmp/docker-compose-backup.yml || true
-            docker ps -a > /tmp/docker-ps-backup.txt || true
-            docker images > /tmp/docker-images-backup.txt || true
-
-            echo '🐳 Restarting Docker (compose up --build)...'
-            set -o errexit
-            {
-              docker compose down &&
-              docker compose up -d --build
-            } || {
-              echo '❗ Docker deploy gagal. Rolling back...'
-              # Otomatis mencoba compose dari backup lama (jika ada)
-              if [ -f /tmp/docker-compose-backup.yml ]; then
-                echo '⬅️ Memulihkan docker-compose dari backup...'
-                docker compose down || true
-                docker compose -f /tmp/docker-compose-backup.yml up -d || true
-              fi
-              exit 1
-            }
-
-            echo '⚡️ Menjalankan migrasi database...'
-            # Menjalankan migrasi di dalam container docker dengan nama service 'app' (ubah sesuai servicemu jika berbeda)
-            docker compose exec -T app php artisan migrate --force || {
-              echo '❌ Migrasi database gagal. Rolling back docker...'
-              if [ -f /tmp/docker-compose-backup.yml ]; then
-                docker compose down || true
-                docker compose -f /tmp/docker-compose-backup.yml up -d || true
-              fi
-              exit 1
-            }
-
-            echo '✅ Deploy & migrasi database berhasil!'
+            echo '✅ Git pull selesai!'
           EOF
 
       # --- 5. Send WhatsApp Notification ---
@@ -141,12 +107,12 @@ jobs:
             done
           else
             BODY="--------------------------------------------\n"
-            BODY+="❌ *Deploy GAGAL!* Rollback docker ke backup sebelumnya.\n"
+            BODY+="❌ *Deploy GAGAL!*\n"
             BODY+="--------------------------------------------\n\n"
             BODY+="Terjadi error saat proses deploy di server.\n"
             BODY+="Detail Commit Update: $TRIMMED_COMMIT_MSG\n\n"
             BODY+="⏰ Jam: $JAM WIB ($HARI_STR), $TANGGAL_IND\n"
-            BODY+="\nSilakan segera cek server Anda untuk memperbaiki error. Update otomatis diurungkan dan telah di-rollback (jika memungkinkan).\n"
+            BODY+="\nSilakan segera cek server Anda untuk memperbaiki error. Update otomatis diurungkan.\n"
             BODY+="\nSalam, sistem CI/CD.\n"
             BODY+="--------------------------------------------\n"
 

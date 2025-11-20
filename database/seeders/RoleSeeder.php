@@ -37,6 +37,12 @@ class RoleSeeder extends Seeder
                 'description' => 'Pembina UKMI Ar-Rahman',
                 'is_system' => true,
             ],
+            [
+                'name' => 'bbq',
+                'label' => 'BBQ',
+                'description' => 'Badan Badan Khusus UKMI Ar-Rahman',
+                'is_system' => true,
+            ],
         ];
 
         foreach ($roles as $role) {

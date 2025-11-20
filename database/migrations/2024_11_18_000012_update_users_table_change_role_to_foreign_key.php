@@ -18,6 +18,7 @@ return new class extends Migration
             ['name' => 'kabid', 'label' => 'Kepala Bidang/Biro', 'description' => 'Kepala Bidang/Biro bertanggung jawab untuk absensi dan dokumentasi', 'is_system' => true],
             ['name' => 'kader', 'label' => 'Kader', 'description' => 'Kader dapat melihat program yang dikerjakan', 'is_system' => true],
             ['name' => 'pembina', 'label' => 'Pembina/Dewan Pembina', 'description' => 'Pembina dapat mengakses laporan', 'is_system' => true],
+            ['name' => 'bbq', 'label' => 'BBQ', 'description' => 'Badan Badan Khusus UKMI Ar-Rahman', 'is_system' => true],
         ];
 
         foreach ($defaultRoles as $role) {
