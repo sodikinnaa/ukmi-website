@@ -686,41 +686,39 @@
     <section class="profile-section">
         <div class="container">
             <h2 class="section-title">Pengurus Inti</h2>
+            @if($periodeAktif)
+                <p class="text-center text-muted mb-4">Periode: {{ $periodeAktif->nama_periode }}</p>
+            @endif
             
-            <div class="row g-4">
-                <div class="col-6 col-md-3">
-                    <div class="profile-card">
-                        <div class="profile-image">
-                            <i class="bi bi-person-circle"></i>
+            @if($pengurusInti && $pengurusInti->count() > 0)
+                <div class="row g-4 justify-content-center">
+                    @foreach($pengurusInti as $pengurus)
+                        <div class="col-6 col-md-3">
+                            <div class="profile-card">
+                                <div class="profile-image">
+                                    @if($pengurus->foto_profil)
+                                        <img src="{{ asset('storage/profiles/' . $pengurus->foto_profil) }}" 
+                                             alt="{{ $pengurus->name }}" 
+                                             style="width: 100%; height: 100%; object-fit: cover; border-radius: 50%;">
+                                    @else
+                                        <div style="width: 100%; height: 100%; display: flex; align-items: center; justify-content: center; background: {{ $pengurus->avatar_color }}; color: white; font-weight: 700; font-size: 2rem; border-radius: 50%;">
+                                            {{ $pengurus->initials }}
+                                        </div>
+                                    @endif
+                                </div>
+                                <p class="profile-name">{{ $pengurus->name }}</p>
+                                <p class="profile-role" style="color: var(--primary-blue); font-weight: 600; font-size: 0.9rem; margin-top: 0.5rem;">
+                                    {{ $pengurus->jabatan === 'Wakil' ? 'Wakil Ketua' : $pengurus->jabatan }}
+                                </p>
+                            </div>
                         </div>
-                        <p class="profile-name">Ketua</p>
-                    </div>
+                    @endforeach
                 </div>
-                <div class="col-6 col-md-3">
-                    <div class="profile-card">
-                        <div class="profile-image">
-                            <i class="bi bi-person-circle"></i>
-                        </div>
-                        <p class="profile-name">Wakil Ketua</p>
-                    </div>
+            @else
+                <div class="text-center py-5">
+                    <p class="text-muted">Data pengurus periode aktif belum tersedia.</p>
                 </div>
-                <div class="col-6 col-md-3">
-                    <div class="profile-card">
-                        <div class="profile-image">
-                            <i class="bi bi-person-circle"></i>
-                        </div>
-                        <p class="profile-name">Sekretaris</p>
-                    </div>
-                </div>
-                <div class="col-6 col-md-3">
-                    <div class="profile-card">
-                        <div class="profile-image">
-                            <i class="bi bi-person-circle"></i>
-                        </div>
-                        <p class="profile-name">Bendahara</p>
-                    </div>
-                </div>
-            </div>
+            @endif
         </div>
     </section>
 
