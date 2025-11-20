@@ -1,0 +1,159 @@
+name: Docker CI/CD Deploy
+
+on:
+  push:
+    branches:
+      - main
+      - master
+      - dev
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+
+    steps:
+      # --- 1. Checkout Repository ---
+      - name: Checkout Code
+        uses: actions/checkout@v4
+
+      # --- 2. Setup SSH Private Key (untuk login server) ---
+      - name: Setup SSH
+        uses: webfactory/ssh-agent@v0.8.0
+        with:
+          ssh-private-key: ${{ secrets.SSH_PRIVATE_KEY }}
+
+      # --- 3. Test SSH Connectivity ---
+      - name: Test SSH Connection
+        run: |
+          echo "Testing SSH to server..."
+          nc -vz ${{ secrets.SERVER_IP }} 22 || true
+
+      # --- 4. Deploy ke server via SSH dengan Auto Rollback jika error & Migrasi Database ---
+      - name: Deploy to Server (with Migration & Rollback)
+        id: deploy_server
+        run: |
+          ssh -p 22 -o StrictHostKeyChecking=no ${{ secrets.SERVER_USER }}@${{ secrets.SERVER_IP }} 'bash -s' <<'EOF'
+            set -e
+            cd "${{ secrets.SERVER_PROJECT_PATH }}"
+
+            echo '📥 Pulling latest code from GitHub...'
+
+            # Auto fix remote jika masih HTTPS
+            REMOTE_URL=$(git remote get-url origin)
+            if [[ $REMOTE_URL == https* ]]; then
+              echo '🔧 Fixing remote URL to SSH...'
+              git remote set-url origin git@github.com:${{ github.repository }}.git
+            fi
+
+            # Pull code
+            git pull origin $GITHUB_REF_NAME
+
+            echo '📝 Menyimpan backup docker sebelum update...'
+            docker compose config > /tmp/docker-compose-backup.yml || true
+            docker ps -a > /tmp/docker-ps-backup.txt || true
+            docker images > /tmp/docker-images-backup.txt || true
+
+            echo '🐳 Restarting Docker (compose up --build)...'
+            set -o errexit
+            {
+              docker compose down &&
+              docker compose up -d --build
+            } || {
+              echo '❗ Docker deploy gagal. Rolling back...'
+              # Otomatis mencoba compose dari backup lama (jika ada)
+              if [ -f /tmp/docker-compose-backup.yml ]; then
+                echo '⬅️ Memulihkan docker-compose dari backup...'
+                docker compose down || true
+                docker compose -f /tmp/docker-compose-backup.yml up -d || true
+              fi
+              exit 1
+            }
+
+            echo '⚡️ Menjalankan migrasi database...'
+            # Menjalankan migrasi di dalam container docker dengan nama service 'app' (ubah sesuai servicemu jika berbeda)
+            docker compose exec -T app php artisan migrate --force || {
+              echo '❌ Migrasi database gagal. Rolling back docker...'
+              if [ -f /tmp/docker-compose-backup.yml ]; then
+                docker compose down || true
+                docker compose -f /tmp/docker-compose-backup.yml up -d || true
+              fi
+              exit 1
+            }
+
+            echo '✅ Deploy & migrasi database berhasil!'
+          EOF
+
+      # --- 5. Send WhatsApp Notification ---
+      - name: Send WhatsApp Notification
+        if: always()
+        run: |
+          COMMIT_MSG="${{ github.event.head_commit.message }}"
+          AUTHOR="${{ github.event.head_commit.author.name }}"
+          BRANCH="${GITHUB_REF_NAME}"
+
+          STATUS="SUCCESS"
+          if [ "${{ steps.deploy_server.outcome }}" = "failure" ]; then
+            STATUS="FAILED"
+          fi
+
+          # Array nama hari dan bulan dalam Bahasa Indonesia
+          HARI_IND=("Minggu" "Senin" "Selasa" "Rabu" "Kamis" "Jumat" "Sabtu")
+          BULAN_IND=("Januari" "Februari" "Maret" "April" "Mei" "Juni" "Juli" "Agustus" "September" "Oktober" "November" "Desember")
+
+          # Set zona waktu WIB
+          export TZ="Asia/Jakarta"
+
+          # Ambil informasi waktu lokal Indonesia
+          JAM=$(date +"%H:%M:%S")
+          TANGGAL_NUM=$(date +"%d")
+          BULAN_NUM=$(date +"%m")
+          BULAN_STR=${BULAN_IND[$((10#$BULAN_NUM-1))]}
+          TAHUN=$(date +"%Y")
+          HARI_INDEX=$(date +"%w")
+          HARI_STR=${HARI_IND[$HARI_INDEX]}
+          TANGGAL_IND="$TANGGAL_NUM $BULAN_STR $TAHUN"
+
+          # Format pesan commit lebih rapi (hilangkan baris kosong yang tidak perlu, hapus spasi berlebih di awal/akhir, dan hilangkan baris trailing newline)
+          TRIMMED_COMMIT_MSG=$(echo "$COMMIT_MSG" | sed '/^[[:space:]]*$/d' | sed 's/^[[:space:]]*//;s/[[:space:]]*$//')
+
+          if [ "$STATUS" == "SUCCESS" ]; then
+            BODY="--------------------------------------------\n"
+            BODY+="🚀 Hai, update terbaru aplikasi/website Anda telah *berhasil* dilakukan! \n"
+            BODY+="--------------------------------------------\n\n"
+            BODY+="📝 *Detail Update yang Dikirim:*\n"
+            BODY+="$TRIMMED_COMMIT_MSG\n\n"
+            BODY+="🔗 Website yang sudah diupdate bisa diakses di:\n"
+            BODY+="    https://member.beraffiliate.com/\n\n"
+            BODY+="📅 Waktu update : $JAM WIB ($HARI_STR), $TANGGAL_IND\n"
+            BODY+="\nSemoga update ini bermanfaat untuk kelancaran operasional Kegiatan. Jika ada pertanyaan atau kendala seputar update ini, silakan langsung hubungi kami di wa.me/6288275426716.\n"
+            BODY+="\nSalam hangat, tim pengembang.\n"
+            BODY+="--------------------------------------------\n"
+
+            # List of client phone numbers (TAMBAHKAN/EDIT DAFTAR DI SINI)
+            PHONES=("6288275426716")
+
+            for PHONE in "${PHONES[@]}"; do
+              curl --location "https://sistemberita.my.id/chat/send/text" \
+                --header "accept: application/json" \
+                --header "Content-Type: application/json" \
+                --header "token: ${{ secrets.WA_TOKEN }}" \
+                --data "{\"Phone\":\"$PHONE\",\"Body\":\"$BODY\"}"
+            done
+          else
+            BODY="--------------------------------------------\n"
+            BODY+="❌ *Deploy GAGAL!* Rollback docker ke backup sebelumnya.\n"
+            BODY+="--------------------------------------------\n\n"
+            BODY+="Terjadi error saat proses deploy di server.\n"
+            BODY+="Detail Commit Update: $TRIMMED_COMMIT_MSG\n\n"
+            BODY+="⏰ Jam: $JAM WIB ($HARI_STR), $TANGGAL_IND\n"
+            BODY+="\nSilakan segera cek server Anda untuk memperbaiki error. Update otomatis diurungkan dan telah di-rollback (jika memungkinkan).\n"
+            BODY+="\nSalam, sistem CI/CD.\n"
+            BODY+="--------------------------------------------\n"
+
+            # HANYA kirim ke nomor 6288275426716 jika GAGAL
+            curl --location "https://sistemberita.my.id/chat/send/text" \
+              --header "accept: application/json" \
+              --header "Content-Type: application/json" \
+              --header "token: ${{ secrets.WA_TOKEN }}" \
+              --data "{\"Phone\":\"6288275426716\",\"Body\":\"$BODY\"}"
+          fi
