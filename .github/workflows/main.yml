@@ -53,6 +53,6 @@ jobs:
       - name: Send WhatsApp Notification via n8n Webhook
         run: |
           curl --location 'https://n8n.siapberkarir.id/webhook/2ae67db3-34ba-4782-866b-beb3429eb42f' \
-          --form "status=succes" \
+          --form "status=ukmi" \
           --form "message=${{ github.event.head_commit.message }}" \
           --form "branch=${{ github.ref_name }}"
