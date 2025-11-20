@@ -79,11 +79,14 @@
             font-weight: 600;
             border: none;
             transition: background 0.3s;
+            text-decoration: none;
+            display: inline-block;
         }
 
         .btn-daftar:hover {
             background: var(--secondary-blue);
             color: var(--white);
+            text-decoration: none;
         }
 
         /* Hero Section */
@@ -117,6 +120,8 @@
             font-size: 1rem;
             transition: all 0.3s;
             box-shadow: 0 4px 15px rgba(66, 153, 225, 0.3);
+            text-decoration: none;
+            display: inline-block;
         }
 
         .btn-gabung:hover {
@@ -124,6 +129,7 @@
             color: var(--white);
             transform: translateY(-2px);
             box-shadow: 0 6px 20px rgba(66, 153, 225, 0.4);
+            text-decoration: none;
         }
 
         .banner-placeholder {
@@ -578,7 +584,7 @@
                         <a class="nav-link" href="#">Kontak</a>
                     </li>
                 </ul>
-                <button class="btn btn-daftar">Daftar UKM</button>
+                <a href="{{ route('login') }}" class="btn btn-daftar">Daftar UKM</a>
             </div>
         </div>
     </nav>
@@ -592,7 +598,7 @@
                     <p class="hero-desc">
                         Mewujudkan generasi muda yang berakhlak mulia, berilmu, dan berdaya saing tinggi melalui pengembangan diri di bidang keislaman dan teknologi.
                     </p>
-                    <button class="btn btn-gabung">Gabung Sekarang</button>
+                    <a href="{{ route('login') }}" class="btn btn-gabung">Gabung Sekarang</a>
                     
                     <div class="banner-placeholder">
                         <i class="bi bi-image" style="font-size: 3rem; margin-bottom: 1rem; display: block;"></i>
