@@ -88,6 +88,10 @@ Route::get('/storage/profiles/{file_name}', function ($file_name) {
 
 Route::get('/struktur-organisasi', StrukturOrganisasiController::class)->name('struktur-organisasi');
 
+// Public Video Tutorial Routes
+Route::get('/video-tutorial', [\App\Http\Controllers\Public\VideoTutorialController::class, 'index'])->name('public.video-tutorial.index');
+Route::get('/video-tutorial/{videoTutorial}', [\App\Http\Controllers\Public\VideoTutorialController::class, 'show'])->name('public.video-tutorial.show');
+
 Route::get('/login', [AuthController::class, 'showLoginForm'])->name('login');
 Route::post('/login', [AuthController::class, 'login']);
 Route::post('/logout', [AuthController::class, 'logout'])->name('logout');

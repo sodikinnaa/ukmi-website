@@ -239,8 +239,18 @@
             <div class="collapse navbar-collapse" id="navbarNav">
                 <ul class="navbar-nav ms-auto">
                     <li class="nav-item">
-                        <a class="nav-link active" href="{{ route('struktur-organisasi') }}">
+                        <a class="nav-link {{ request()->routeIs('home') ? 'active' : '' }}" href="{{ route('home') }}">
+                            <i class="bi bi-house"></i> Beranda
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link {{ request()->routeIs('struktur-organisasi') ? 'active' : '' }}" href="{{ route('struktur-organisasi') }}">
                             <i class="bi bi-diagram-3"></i> Struktur Organisasi
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link {{ request()->routeIs('public.video-tutorial.*') ? 'active' : '' }}" href="{{ route('public.video-tutorial.index') }}">
+                            <i class="bi bi-play-circle"></i> Video Tutorial
                         </a>
                     </li>
                 </ul>
