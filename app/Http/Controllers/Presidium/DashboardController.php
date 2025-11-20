@@ -121,5 +121,17 @@ class DashboardController extends Controller
             'hasPertemuanTable' => $hasPertemuanTable,
         ]);
     }
+
+    /**
+     * Menampilkan halaman guide/manual book
+     */
+    public function guide()
+    {
+        $user = Auth::user();
+        
+        return view('presidium.guide.index', [
+            'user' => $user,
+        ]);
+    }
 }
 

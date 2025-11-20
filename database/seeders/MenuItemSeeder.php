@@ -89,11 +89,19 @@ class MenuItemSeeder extends Seeder
                 'parent_id' => null,
             ],
             [
+                'name' => 'presidium.guide',
+                'label' => 'Manual Book / Guide',
+                'route' => 'presidium.guide',
+                'icon' => '<svg xmlns="http://www.w3.org/2000/svg" class="icon" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round"><path stroke="none" d="M0 0h24v24H0z" fill="none"/><path d="M4 4h16v2.172a2 2 0 0 1 -.586 1.414l-4.828 4.828a2 2 0 0 0 -.586 1.414v4.172a2 2 0 0 1 -2 2h-4a2 2 0 0 1 -2 -2v-4.172a2 2 0 0 0 -.586 -1.414l-4.828 -4.828a2 2 0 0 1 -.586 -1.414v-2.172z" /></svg>',
+                'order' => 10,
+                'parent_id' => null,
+            ],
+            [
                 'name' => 'presidium.absensi',
                 'label' => 'Absensi',
                 'route' => 'absensi.index',
                 'icon' => '<svg xmlns="http://www.w3.org/2000/svg" class="icon" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round"><path stroke="none" d="M0 0h24v24H0z" fill="none"/><path d="M9 5h-2a2 2 0 0 0 -2 2v12a2 2 0 0 0 2 2h10a2 2 0 0 0 2 -2v-12a2 2 0 0 0 -2 -2h-2" /><path d="M9 3m0 2a2 2 0 0 1 2 -2h2a2 2 0 0 1 2 2v0a2 2 0 0 1 -2 2h-2a2 2 0 0 1 -2 -2z" /><path d="M9 12l2 2l4 -4" /></svg>',
-                'order' => 10,
+                'order' => 11,
                 'parent_id' => null,
             ],
             
@@ -301,6 +309,7 @@ class MenuItemSeeder extends Seeder
                 'presidium.periode.access',
                 'presidium.role.access',
                 'presidium.referensi-progja.access',
+                'presidium.guide.access',
                 'presidium.absensi.access',
             ];
             

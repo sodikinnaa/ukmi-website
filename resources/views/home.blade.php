@@ -696,15 +696,19 @@
                         <div class="col-6 col-md-3">
                             <div class="profile-card">
                                 <div class="profile-image">
-                                    @if($pengurus->foto_profil)
-                                        <img src="{{ asset('storage/profiles/' . $pengurus->foto_profil) }}" 
+                                    @php
+                                        $hasFoto = !empty($pengurus->foto_profile);
+                                    @endphp
+                                    @if($hasFoto)
+                                        <img src="{{ asset('storage/profiles/' . $pengurus->foto_profile) }}" 
                                              alt="{{ $pengurus->name }}" 
+                                             onerror="this.onerror=null; this.style.display='none'; this.nextElementSibling.style.display='flex';"
                                              style="width: 100%; height: 100%; object-fit: cover; border-radius: 50%;">
-                                    @else
-                                        <div style="width: 100%; height: 100%; display: flex; align-items: center; justify-content: center; background: {{ $pengurus->avatar_color }}; color: white; font-weight: 700; font-size: 2rem; border-radius: 50%;">
-                                            {{ $pengurus->initials }}
-                                        </div>
                                     @endif
+                                    <div class="profile-initials" 
+                                         style="width: 100%; height: 100%; display: {{ $hasFoto ? 'none' : 'flex' }}; align-items: center; justify-content: center; background: {{ $pengurus->avatar_color }}; color: white; font-weight: 700; font-size: 2rem; border-radius: 50%;">
+                                        {{ $pengurus->initials }}
+                                    </div>
                                 </div>
                                 <p class="profile-name">{{ $pengurus->name }}</p>
                                 <p class="profile-role" style="color: var(--primary-blue); font-weight: 600; font-size: 0.9rem; margin-top: 0.5rem;">

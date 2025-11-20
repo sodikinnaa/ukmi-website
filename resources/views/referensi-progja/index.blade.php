@@ -15,7 +15,7 @@
             <div class="card-header">
                 <h3 class="card-title">Referensi Program Kerja</h3>
                 <div class="card-subtitle text-muted">
-                    Daftar program kerja dari periode kepengurusan sebelumnya
+                    Daftar program kerja dari semua periode kepengurusan
                 </div>
             </div>
             <div class="card-body">
@@ -31,6 +31,9 @@
                                         {{ $periode->nama_periode }}
                                         @if($periode->tanggal_mulai)
                                             ({{ $periode->tanggal_mulai->format('Y') }})
+                                        @endif
+                                        @if($periode->is_aktif)
+                                            - Aktif
                                         @endif
                                     </option>
                                 @endforeach
@@ -160,7 +163,12 @@
                                         </td>
                                         <td>
                                             @if($progja->periode)
-                                                <span class="badge bg-secondary">{{ $progja->periode->nama_periode }}</span>
+                                                <span class="badge {{ $progja->periode->is_aktif ? 'bg-success' : 'bg-secondary' }}">
+                                                    {{ $progja->periode->nama_periode }}
+                                                    @if($progja->periode->is_aktif)
+                                                        <span class="badge bg-white text-success ms-1">Aktif</span>
+                                                    @endif
+                                                </span>
                                                 @if($progja->periode->tanggal_mulai)
                                                     <div class="text-muted small">{{ $progja->periode->tanggal_mulai->format('Y') }}</div>
                                                 @endif

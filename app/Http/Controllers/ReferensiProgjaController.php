@@ -9,16 +9,15 @@ use Illuminate\Http\Request;
 class ReferensiProgjaController extends Controller
 {
     /**
-     * Menampilkan daftar program kerja dari periode sebelumnya (bukan periode aktif)
+     * Menampilkan daftar program kerja dari semua periode
      */
     public function index(Request $request)
     {
         // Get periode aktif
         $periodeAktif = PeriodeKepengurusan::where('is_aktif', true)->first();
         
-        // Get semua periode sebelumnya (bukan periode aktif)
-        $query = PeriodeKepengurusan::where('is_aktif', false)
-            ->orderBy('tanggal_mulai', 'desc');
+        // Get semua periode (aktif dan non-aktif)
+        $query = PeriodeKepengurusan::orderBy('tanggal_mulai', 'desc');
         
         // Filter berdasarkan periode jika dipilih
         if ($request->filled('periode_id')) {
@@ -27,12 +26,9 @@ class ReferensiProgjaController extends Controller
         
         $periodeList = $query->get();
         
-        // Get program kerja dari periode sebelumnya
+        // Get program kerja dari semua periode
         $programKerjaQuery = ProgramKerja::with(['kategoriBiro', 'periode', 'creator'])
-            ->withCount(['kader', 'pertemuan'])
-            ->whereHas('periode', function($q) {
-                $q->where('is_aktif', false);
-            });
+            ->withCount(['kader', 'pertemuan']);
         
         // Filter berdasarkan periode jika dipilih
         if ($request->filled('periode_id')) {
@@ -71,17 +67,10 @@ class ReferensiProgjaController extends Controller
     }
 
     /**
-     * Menampilkan detail program kerja dari periode sebelumnya
+     * Menampilkan detail program kerja dari semua periode
      */
     public function show(ProgramKerja $programKerja)
     {
-        // Pastikan program kerja ini dari periode sebelumnya (bukan aktif)
-        $periodeAktif = PeriodeKepengurusan::where('is_aktif', true)->first();
-        
-        if ($programKerja->periode_id && $periodeAktif && $programKerja->periode_id == $periodeAktif->id) {
-            abort(404, 'Program kerja ini bukan dari periode sebelumnya.');
-        }
-        
         // Load semua relasi yang diperlukan
         $programKerja->load([
             'kategoriBiro',

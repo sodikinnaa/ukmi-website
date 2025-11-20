@@ -100,6 +100,7 @@ Route::middleware(['auth'])->group(function () {
     // Presidium Routes - menggunakan permission middleware untuk mengecek permission berdasarkan route
     Route::prefix('presidium')->name('presidium.')->middleware(['permission'])->group(function () {
         Route::get('/dashboard', [\App\Http\Controllers\Presidium\DashboardController::class, 'index'])->name('dashboard');
+        Route::get('/guide', [\App\Http\Controllers\Presidium\DashboardController::class, 'guide'])->name('guide');
         // User Management Routes (route khusus harus didefinisikan sebelum resource)
         Route::get('/user/export', [\App\Http\Controllers\Presidium\UserController::class, 'export'])->name('user.export');
         Route::get('/user/template/download', [\App\Http\Controllers\Presidium\UserController::class, 'downloadTemplate'])->name('user.download-template');
