@@ -27,7 +27,7 @@ jobs:
           nc -vz ${{ secrets.SERVER_IP }} 65002 || true
 
       # --- 4. Deploy ke server via SSH (Git Pull Only) ---
-      - name: Deploy to Server (Git Pull Only)
+      - name: Deploy to Server, Migrate & Seed Database
         id: deploy_server
         run: |
           ssh -p 65002 -o StrictHostKeyChecking=no ${{ secrets.SERVER_USER }}@${{ secrets.SERVER_IP }} 'bash -s' <<'EOF'
@@ -47,6 +47,14 @@ jobs:
             git pull origin $GITHUB_REF_NAME
 
             echo '✅ Git pull selesai!'
+
+            echo '📦 Migrating database...'
+            php artisan migrate --force
+
+            echo '🌱 Seeding database...'
+            php artisan db:seed --force
+
+            echo '🚀 Deployment, migration & seeding selesai!'
           EOF
 
       # --- 5. Send WhatsApp Notification ---
