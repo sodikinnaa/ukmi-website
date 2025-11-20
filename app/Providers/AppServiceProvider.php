@@ -21,5 +21,13 @@ class AppServiceProvider extends ServiceProvider
     {
         // Use custom pagination view
         \Illuminate\Pagination\Paginator::defaultView('vendor.pagination.tabler');
+        
+        // Set PHP ini values for large file uploads (if allowed)
+        if (function_exists('ini_set')) {
+            @ini_set('upload_max_filesize', '200M');
+            @ini_set('post_max_size', '200M');
+            @ini_set('max_execution_time', '300');
+            @ini_set('max_input_time', '300');
+        }
     }
 }

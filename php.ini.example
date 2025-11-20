@@ -1,0 +1,18 @@
+; PHP Configuration untuk Upload File Besar (200MB)
+; Copy file ini ke php.ini atau tambahkan ke php.ini yang ada
+
+; Maximum allowed size for uploaded files
+upload_max_filesize = 200M
+
+; Maximum size of POST data
+post_max_size = 200M
+
+; Maximum execution time (in seconds)
+max_execution_time = 300
+
+; Maximum input time (in seconds)
+max_input_time = 300
+
+; Memory limit
+memory_limit = 256M
+

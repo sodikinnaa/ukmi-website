@@ -6,6 +6,7 @@ use App\Http\Controllers\Controller;
 use App\Models\MenuItem;
 use App\Models\Permission;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Route;
 
 class MenuController extends Controller
 {
@@ -40,7 +41,16 @@ class MenuController extends Controller
         $validated = $request->validate([
             'name' => 'required|string|max:255|unique:menu_items,name',
             'label' => 'required|string|max:255',
-            'route' => 'nullable|string|max:255',
+            'route' => [
+                'nullable',
+                'string',
+                'max:255',
+                function ($attribute, $value, $fail) {
+                    if ($value && !Route::has($value)) {
+                        $fail('Route ' . $value . ' tidak ditemukan.');
+                    }
+                },
+            ],
             'icon' => 'nullable|string',
             'order' => 'nullable|integer|min:0',
             'parent_id' => 'nullable|exists:menu_items,id',
@@ -84,7 +94,16 @@ class MenuController extends Controller
         $validated = $request->validate([
             'name' => 'required|string|max:255|unique:menu_items,name,' . $menu->id,
             'label' => 'required|string|max:255',
-            'route' => 'nullable|string|max:255',
+            'route' => [
+                'nullable',
+                'string',
+                'max:255',
+                function ($attribute, $value, $fail) {
+                    if ($value && !Route::has($value)) {
+                        $fail('Route ' . $value . ' tidak ditemukan.');
+                    }
+                },
+            ],
             'icon' => 'nullable|string',
             'order' => 'nullable|integer|min:0',
             'parent_id' => 'nullable|exists:menu_items,id',

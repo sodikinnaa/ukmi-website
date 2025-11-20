@@ -15,6 +15,12 @@ return Application::configure(basePath: dirname(__DIR__))
             'role' => \App\Http\Middleware\RoleMiddleware::class,
             'permission' => \App\Http\Middleware\PermissionMiddleware::class,
         ]);
+        
+        // Replace ValidatePostSize dengan custom middleware untuk support upload 200MB
+        $middleware->replace(
+            \Illuminate\Http\Middleware\ValidatePostSize::class,
+            \App\Http\Middleware\CustomValidatePostSize::class
+        );
     })
     ->withExceptions(function (Exceptions $exceptions): void {
         //

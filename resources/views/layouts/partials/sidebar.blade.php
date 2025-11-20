@@ -145,18 +145,25 @@
                                                     // Untuk sub menu user, tambahkan query parameter role_id (dinamis berdasarkan role)
                                                     $childUrl = '#';
                                                     if ($child->route && $childHasAccess) {
-                                                        if ($menuItem->name === 'presidium.user' && str_contains($child->name, 'presidium.user.')) {
-                                                            // Extract role name dari child name (presidium.user.{role_name} -> {role_name})
-                                                            $roleName = str_replace('presidium.user.', '', $child->name);
-                                                            $role = \App\Models\Role::where('name', $roleName)->first();
-                                                            if ($role) {
-                                                                // Gunakan URL dengan query parameter
-                                                                $childUrl = route($child->route) . '?role_id=' . $role->id;
-                                                            } else {
-                                                                $childUrl = route($child->route);
+                                                        try {
+                                                            if (Route::has($child->route)) {
+                                                                if ($menuItem->name === 'presidium.user' && str_contains($child->name, 'presidium.user.')) {
+                                                                    // Extract role name dari child name (presidium.user.{role_name} -> {role_name})
+                                                                    $roleName = str_replace('presidium.user.', '', $child->name);
+                                                                    $role = \App\Models\Role::where('name', $roleName)->first();
+                                                                    if ($role) {
+                                                                        // Gunakan URL dengan query parameter
+                                                                        $childUrl = route($child->route) . '?role_id=' . $role->id;
+                                                                    } else {
+                                                                        $childUrl = route($child->route);
+                                                                    }
+                                                                } else {
+                                                                    $childUrl = route($child->route);
+                                                                }
                                                             }
-                                                        } else {
-                                                            $childUrl = route($child->route);
+                                                        } catch (\Exception $e) {
+                                                            // Route tidak ditemukan, gunakan #
+                                                            $childUrl = '#';
                                                         }
                                                     }
                                                     
@@ -191,8 +198,21 @@
                                     </div>
                                 @else
                                     {{-- Menu tanpa sub menu --}}
+                                    @php
+                                        $menuUrl = '#';
+                                        if ($menuItem->route) {
+                                            try {
+                                                if (Route::has($menuItem->route)) {
+                                                    $menuUrl = route($menuItem->route);
+                                                }
+                                            } catch (\Exception $e) {
+                                                // Route tidak ditemukan, gunakan #
+                                                $menuUrl = '#';
+                                            }
+                                        }
+                                    @endphp
                                     <a class="nav-link d-flex align-items-center {{ $menuIsActive ? 'active' : '' }}" 
-                                       href="{{ $menuItem->route ? route($menuItem->route) : '#' }}">
+                                       href="{{ $menuUrl }}">
                                         <span class="nav-link-icon me-2">
                                             {!! $menuItem->icon !!}
                                         </span>

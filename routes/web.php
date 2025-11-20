@@ -56,6 +56,22 @@ Route::get('/storage/program-kerja/{file_name}', function ($file_name) {
     return response()->file($filePath);
 })->name('materi.view');
 
+Route::get('/storage/video-tutorials/{file_name}', function ($file_name) {
+    $filePath = storage_path('app/public/video-tutorials/' . $file_name);
+
+    if (!file_exists($filePath)) {
+        abort(404, 'File tidak ditemukan.');
+    }
+
+    if (!preg_match('/^[a-zA-Z0-9_\-\.]+$/', $file_name)) {
+        abort(400, 'Nama file tidak valid.');
+    }
+
+    return response()->file($filePath, [
+        'Content-Type' => 'video/mp4'
+    ]);
+})->name('video-tutorial.view');
+
 Route::get('/storage/profiles/{file_name}', function ($file_name) {
     $filePath = storage_path('app/public/profiles/' . $file_name);
 
@@ -138,6 +154,9 @@ Route::middleware(['auth'])->group(function () {
         
         // Menu Management Routes
         Route::resource('menu', \App\Http\Controllers\Presidium\MenuController::class);
+        
+        // Video Tutorial Management Routes
+        Route::resource('video-tutorial', \App\Http\Controllers\Presidium\VideoTutorialController::class);
     });
     
     // Kabid Routes
