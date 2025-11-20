@@ -372,6 +372,134 @@
             color: #ffffff !important;
             text-shadow: 0 1px 1px rgba(0, 0, 0, 0.1);
         }
+        
+        /* Styling untuk sub menu - dropdown ke bawah vertikal */
+        .navbar-vertical .collapse {
+            margin-left: 0 !important;
+            padding-left: 0 !important;
+            margin-top: 0.25rem;
+        }
+        
+        .navbar-vertical .nav-sub {
+            list-style: none;
+            padding: 0.5rem 0 !important;
+            margin: 0.25rem 0 0.5rem 0 !important;
+            background-color: rgba(var(--tblr-bg-surface-rgb), 0.6);
+            border-radius: var(--tblr-border-radius);
+            border: 1px solid rgba(var(--tblr-border-color-rgb), 0.1);
+            margin-left: 0 !important;
+            padding-left: 0 !important;
+            width: 100%;
+        }
+        
+        .navbar-vertical .nav-sub .nav-item {
+            margin: 0 !important;
+            padding: 0 !important;
+            width: 100%;
+        }
+        
+        .navbar-vertical .nav-sub .nav-link {
+            padding: 0.625rem 1.5rem !important;
+            color: var(--tblr-body-color);
+            font-size: 0.875rem;
+            transition: all 0.2s;
+            display: flex;
+            align-items: center;
+            text-decoration: none;
+            border-left: 3px solid transparent;
+            position: relative;
+            width: 100%;
+            margin-left: 0 !important;
+            padding-left: 1.5rem !important;
+        }
+        
+        .nav-sub .nav-link::before {
+            content: '';
+            position: absolute;
+            left: 0;
+            top: 0;
+            bottom: 0;
+            width: 3px;
+            background-color: transparent;
+            transition: background-color 0.2s;
+        }
+        
+        .nav-sub .nav-link:hover {
+            background-color: rgba(var(--tblr-primary-rgb), 0.08);
+            color: var(--tblr-primary);
+        }
+        
+        .nav-sub .nav-link:hover::before {
+            background-color: var(--tblr-primary);
+        }
+        
+        .nav-sub .nav-link.active {
+            background-color: rgba(var(--tblr-primary-rgb), 0.12);
+            color: var(--tblr-primary);
+            font-weight: 600;
+        }
+        
+        .nav-sub .nav-link.active::before {
+            background-color: var(--tblr-primary);
+        }
+        
+        .nav-sub .nav-link-title {
+            flex: 1;
+        }
+        
+        /* Arrow indicator untuk menu dengan sub menu */
+        .nav-link-arrow {
+            transition: transform 0.2s ease;
+            display: flex;
+            align-items: center;
+            opacity: 0.6;
+            flex-shrink: 0;
+        }
+        
+        .nav-link:hover .nav-link-arrow {
+            opacity: 1;
+        }
+        
+        .nav-link[aria-expanded="true"] .nav-link-arrow,
+        .nav-link[aria-expanded="true"] .nav-link-arrow svg {
+            transform: rotate(90deg);
+            opacity: 1;
+        }
+        
+        .nav-link[aria-expanded="true"] .nav-link-arrow svg {
+            color: var(--tblr-primary);
+        }
+        
+        /* Pastikan arrow tidak terpengaruh transform dari parent */
+        .nav-link-arrow svg {
+            transition: transform 0.2s ease, color 0.2s ease;
+        }
+        
+        /* Collapse animation */
+        .collapse {
+            transition: height 0.35s ease;
+        }
+        
+        .collapse:not(.show) {
+            display: none;
+        }
+        
+        .collapse.show {
+            display: block;
+        }
+        
+        /* Styling untuk nav-link yang punya sub menu */
+        .nav-link[data-bs-toggle="collapse"] {
+            cursor: pointer;
+        }
+        
+        .nav-link[data-bs-toggle="collapse"]:hover {
+            background-color: rgba(var(--tblr-primary-rgb), 0.05);
+        }
+        
+        .nav-link[data-bs-toggle="collapse"].active {
+            background-color: rgba(var(--tblr-primary-rgb), 0.1);
+        }
     </style>
 
     @stack('styles')
@@ -535,6 +663,25 @@
             window.addEventListener('resize', function() {
                 if (window.innerWidth > 991.98) {
                     closeSidebar();
+                }
+            });
+            
+            // Handle collapse untuk sub menu
+            const collapseElements = document.querySelectorAll('[data-bs-toggle="collapse"]');
+            collapseElements.forEach(function(element) {
+                const targetId = element.getAttribute('data-bs-target');
+                if (targetId) {
+                    const targetElement = document.querySelector(targetId);
+                    if (targetElement) {
+                        // Update aria-expanded saat collapse di-toggle
+                        targetElement.addEventListener('show.bs.collapse', function() {
+                            element.setAttribute('aria-expanded', 'true');
+                        });
+                        
+                        targetElement.addEventListener('hide.bs.collapse', function() {
+                            element.setAttribute('aria-expanded', 'false');
+                        });
+                    }
                 }
             });
         });

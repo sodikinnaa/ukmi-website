@@ -210,7 +210,7 @@ class UserController extends Controller
     /**
      * Menampilkan form edit user
      */
-    public function edit(User $user)
+    public function edit(Request $request, User $user)
     {
         $user->load(['roleModel', 'periodeKader', 'periodeKabid', 'periodePresidium']);
         $roles = Role::orderBy('name')->get();
@@ -231,7 +231,20 @@ class UserController extends Controller
             }
         }
         
-        return view('presidium.user.edit', compact('user', 'roles', 'periodeList', 'periodeAktif', 'selectedPeriodeIds'));
+        // Get redirect_back URL dari query parameter
+        $redirectBack = $request->get('redirect_back', route('presidium.user.index'));
+        
+        // Validasi URL untuk keamanan - hanya allow internal URL
+        if ($redirectBack && !filter_var($redirectBack, FILTER_VALIDATE_URL)) {
+            $redirectBack = route('presidium.user.index');
+        }
+        
+        // Pastikan URL adalah internal (same host)
+        if ($redirectBack && !str_starts_with($redirectBack, url('/'))) {
+            $redirectBack = route('presidium.user.index');
+        }
+        
+        return view('presidium.user.edit', compact('user', 'roles', 'periodeList', 'periodeAktif', 'selectedPeriodeIds', 'redirectBack'));
     }
 
     /**
@@ -297,7 +310,20 @@ class UserController extends Controller
             }
         }
 
-        return redirect()->route('presidium.user.index')
+        // Redirect ke halaman sebelumnya jika ada, atau ke index
+        $redirectBack = $request->input('redirect_back', route('presidium.user.index'));
+        
+        // Validasi URL untuk keamanan - hanya allow internal URL
+        if ($redirectBack && !filter_var($redirectBack, FILTER_VALIDATE_URL)) {
+            $redirectBack = route('presidium.user.index');
+        }
+        
+        // Pastikan URL adalah internal (same host)
+        if ($redirectBack && !str_starts_with($redirectBack, url('/'))) {
+            $redirectBack = route('presidium.user.index');
+        }
+        
+        return redirect($redirectBack)
             ->with('success', 'User berhasil diperbarui.');
     }
 

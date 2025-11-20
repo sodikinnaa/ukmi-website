@@ -1,0 +1,78 @@
+═══════════════════════════════════════════════════════════════
+   KREDENSIAL LOGIN DEMO - UKMI AR-RAHMAN MANAGEMENT SYSTEM
+═══════════════════════════════════════════════════════════════
+
+📍 URL LOGIN: https://rumah-singgah.site
+🔑 PASSWORD SEMUA USER: password
+
+═══════════════════════════════════════════════════════════════
+   PRESIDIUM (Akses Penuh - Admin)
+═══════════════════════════════════════════════════════════════
+
+1. Ketua Umum
+   Email: usmanpuji@ukmi.test
+   Password: password
+
+2. Wakil Ketua Umum
+   Email: desti@ukmi.test
+   Password: password
+
+3. Sekretaris Umum
+   Email: ichwan@ukmi.test
+   Password: password
+
+4. Bendahara Umum
+   Email: dirta@ukmi.test
+   Password: password
+
+═══════════════════════════════════════════════════════════════
+   KABID - Kepala Bidang (Per Bidang)
+═══════════════════════════════════════════════════════════════
+
+KADERISASI:
+- Ketua: aldo.kaderisasi@ukmi.test / password
+- Sekretaris: shafira.kaderisasi@ukmi.test / password
+- Bendahara: siti.kaderisasi@ukmi.test / password
+
+KSI (Kajian dan Syiar Islam):
+- Ketua: soidkin.ksi@ukmi.test / password
+- Sekretaris: renita.ksi@ukmi.test / password
+- Bendahara: fitria.ksi@ukmi.test / password
+
+BBQ (Bimbingan Baca Quran):
+- Ketua: bagus.bbq@ukmi.test / password
+- Sekretaris: yulistiani.bbq@ukmi.test / password
+- Bendahara: novita.bbq@ukmi.test / password
+
+DANUS (Dana dan Usaha):
+- Ketua: aldo.danus@ukmi.test / password
+- Sekretaris: tiara.danus@ukmi.test / password
+- Bendahara: fitri.danus@ukmi.test / password
+
+AKADEMIK:
+- Ketua: rangga.akademik@ukmi.test / password
+- Sekretaris: mufaza.akademik@ukmi.test / password
+- Bendahara: nova.akademik@ukmi.test / password
+
+HMD (Humas dan Dokumentasi):
+- Ketua: rama.hmd@ukmi.test / password
+- Sekretaris: sekar.hmd@ukmi.test / password
+- Bendahara: tiara.hmd@ukmi.test / password
+
+═══════════════════════════════════════════════════════════════
+   PEMBINA
+═══════════════════════════════════════════════════════════════
+
+- Merli Sanjaya: merli@ukmi.test / password
+
+═══════════════════════════════════════════════════════════════
+   CATATAN PENTING
+═══════════════════════════════════════════════════════════════
+
+⚠️  Semua password adalah: password
+⚠️  Kredensial ini HANYA untuk DEMO
+⚠️  WAJIB ubah password setelah setup production
+⚠️  Kader ditambahkan oleh Presidium melalui menu Manajemen User
+
+═══════════════════════════════════════════════════════════════
+

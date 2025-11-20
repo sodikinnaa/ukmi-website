@@ -16,7 +16,7 @@
                 <h3 class="card-title">Detail User: {{ $user->name }}</h3>
                 <div class="card-actions">
                     <a href="{{ route('presidium.user.index') }}" class="btn btn-secondary">Kembali</a>
-                    <a href="{{ route('presidium.user.edit', $user) }}" class="btn btn-primary">Edit</a>
+                    <a href="{{ route('presidium.user.edit', $user) }}?redirect_back={{ urlencode(route('presidium.user.show', $user)) }}" class="btn btn-primary">Edit</a>
                 </div>
             </div>
             <div class="card-body">

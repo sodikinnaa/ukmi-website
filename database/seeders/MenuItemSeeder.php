@@ -214,6 +214,14 @@ class MenuItemSeeder extends Seeder
                 'order' => 4,
                 'parent_id' => null,
             ],
+            [
+                'name' => 'pembina.periode',
+                'label' => 'Pengaturan Periode',
+                'route' => 'pembina.periode.index',
+                'icon' => '<svg xmlns="http://www.w3.org/2000/svg" class="icon" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round"><path stroke="none" d="M0 0h24v24H0z" fill="none"/><path d="M4 5m0 2a2 2 0 0 1 2 -2h12a2 2 0 0 1 2 2v12a2 2 0 0 1 -2 2h-12a2 2 0 0 1 -2 -2z" /><path d="M16 3l0 4" /><path d="M8 3l0 4" /><path d="M4 11l16 0" /><path d="M8 15h.01" /><path d="M12 15h.01" /><path d="M16 15h.01" /></svg>',
+                'order' => 5,
+                'parent_id' => null,
+            ],
         ];
 
         foreach ($menus as $menu) {
@@ -233,6 +241,48 @@ class MenuItemSeeder extends Seeder
             );
         }
 
+        // Tambahkan sub menu untuk Manajemen User berdasarkan role (DINAMIS)
+        $userMenuParent = MenuItem::where('name', 'presidium.user')->first();
+        if ($userMenuParent) {
+            // Get semua role dari database (dinamis)
+            $allRoles = \App\Models\Role::orderBy('name')->get();
+            
+            $subMenus = [];
+            $order = 1;
+            
+            foreach ($allRoles as $role) {
+                $subMenus[] = [
+                    'name' => 'presidium.user.' . $role->name,
+                    'label' => $role->label ?? ucfirst($role->name),
+                    'route' => 'presidium.user.index',
+                    'icon' => '', // Tidak perlu icon untuk sub menu
+                    'order' => $order++,
+                    'parent_id' => $userMenuParent->id,
+                    'role_id' => $role->id,
+                ];
+            }
+
+            foreach ($subMenus as $subMenu) {
+                $roleId = $subMenu['role_id'];
+                unset($subMenu['role_id']);
+                
+                $subMenuItem = MenuItem::updateOrCreate(
+                    ['name' => $subMenu['name']],
+                    array_merge($subMenu, ['is_active' => true])
+                );
+
+                // Buat permission untuk sub menu
+                Permission::updateOrCreate(
+                    ['name' => $subMenu['name'] . '.access'],
+                    [
+                        'label' => 'Akses ' . $subMenu['label'] . ' (Manajemen User)',
+                        'menu_item_id' => $subMenuItem->id,
+                        'description' => 'Permission untuk mengakses menu ' . $subMenu['label'] . ' di Manajemen User',
+                    ]
+                );
+            }
+        }
+
         // Assign permissions ke default roles
         $presidiumRole = \App\Models\Role::where('name', 'presidium')->first();
         $kabidRole = \App\Models\Role::where('name', 'kabid')->first();
@@ -240,7 +290,8 @@ class MenuItemSeeder extends Seeder
         $pembinaRole = \App\Models\Role::where('name', 'pembina')->first();
 
         if ($presidiumRole) {
-            $presidiumPermissions = Permission::whereIn('name', [
+            // Get semua permission untuk presidium (termasuk sub menu user yang dinamis)
+            $presidiumPermissionNames = [
                 'presidium.dashboard.access',
                 'presidium.user.access',
                 'presidium.program-kerja.access',
@@ -251,7 +302,13 @@ class MenuItemSeeder extends Seeder
                 'presidium.role.access',
                 'presidium.referensi-progja.access',
                 'presidium.absensi.access',
-            ])->pluck('id');
+            ];
+            
+            // Tambahkan semua permission untuk sub menu user (dinamis)
+            $userSubMenuPermissions = Permission::where('name', 'like', 'presidium.user.%.access')->pluck('name')->toArray();
+            $presidiumPermissionNames = array_merge($presidiumPermissionNames, $userSubMenuPermissions);
+            
+            $presidiumPermissions = Permission::whereIn('name', $presidiumPermissionNames)->pluck('id');
             $presidiumRole->permissions()->sync($presidiumPermissions);
         }
 
@@ -283,6 +340,7 @@ class MenuItemSeeder extends Seeder
                 'pembina.laporan.access',
                 'pembina.referensi-progja.access',
                 'pembina.absensi.access',
+                'pembina.periode.access',
             ])->pluck('id');
             $pembinaRole->permissions()->sync($pembinaPermissions);
         }

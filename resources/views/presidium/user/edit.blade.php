@@ -18,6 +18,7 @@
             <form action="{{ route('presidium.user.update', $user) }}" method="POST" enctype="multipart/form-data">
                 @csrf
                 @method('PUT')
+                <input type="hidden" name="redirect_back" value="{{ $redirectBack ?? route('presidium.user.index') }}">
                 <div class="card-body">
                     <div class="row">
                         <div class="col-md-6">
@@ -242,7 +243,7 @@
                     @endif
                 </div>
                 <div class="card-footer">
-                    <a href="{{ route('presidium.user.index') }}" class="btn btn-secondary">Batal</a>
+                    <a href="{{ $redirectBack ?? route('presidium.user.index') }}" class="btn btn-secondary">Batal</a>
                     <button type="submit" class="btn btn-primary">Update</button>
                 </div>
             </form>

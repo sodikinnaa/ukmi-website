@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\Presidium;
 
 use App\Http\Controllers\Controller;
+use App\Http\Services\RoleMenuService;
 use App\Models\Role;
 use App\Models\Permission;
 use App\Models\MenuItem;
@@ -40,10 +41,17 @@ class RoleController extends Controller
             'description' => 'nullable|string',
         ]);
 
-        Role::create($validated);
+        $role = DB::transaction(function () use ($validated) {
+            $role = Role::create($validated);
+
+            // Buat menu item dan permission untuk role baru di Manajemen User
+            RoleMenuService::createRoleMenu($role);
+            
+            return $role;
+        });
 
         return redirect()->route('presidium.role.index')
-            ->with('success', 'Role berhasil ditambahkan.');
+            ->with('success', 'Role berhasil ditambahkan. Menu item otomatis dibuat di Manajemen User.');
     }
 
     /**
@@ -100,10 +108,28 @@ class RoleController extends Controller
             'description' => 'nullable|string',
         ]);
 
-        $role->update($validated);
+        DB::transaction(function () use ($role, $validated) {
+            $oldName = $role->name;
+            
+            // Jika name berubah, hapus menu item lama dulu (sebelum update)
+            if ($oldName !== $validated['name']) {
+                RoleMenuService::deleteRoleMenuByName($oldName);
+            }
+            
+            $role->update($validated);
+            $role->refresh(); // Refresh untuk mendapatkan data terbaru
+
+            // Jika name berubah, buat menu item baru dengan name yang baru
+            if ($oldName !== $role->name) {
+                RoleMenuService::createRoleMenu($role);
+            } else {
+                // Update label menu item jika hanya label yang berubah
+                RoleMenuService::updateRoleMenu($role);
+            }
+        });
 
         return redirect()->route('presidium.role.index')
-            ->with('success', 'Role berhasil diperbarui.');
+            ->with('success', 'Role berhasil diperbarui. Menu item otomatis diupdate di Manajemen User.');
     }
 
     /**
@@ -121,7 +147,17 @@ class RoleController extends Controller
                 ->with('error', 'Role tidak dapat dihapus karena masih digunakan oleh user.');
         }
 
-        $role->delete();
+        // Hapus menu item dan permission terkait untuk role ini
+        DB::transaction(function () use ($role) {
+            // Hapus menu item dan permission terkait
+            RoleMenuService::deleteRoleMenu($role);
+            
+            // Hapus relasi permission dari role
+            $role->permissions()->detach();
+            
+            // Hapus role
+            $role->delete();
+        });
 
         return redirect()->route('presidium.role.index')
             ->with('success', 'Role berhasil dihapus.');

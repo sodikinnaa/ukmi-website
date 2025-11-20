@@ -70,41 +70,141 @@
                             $hasAccess = $menuPermission && $user->hasPermission($menuPermission->name);
                         @endphp
                         @if($hasAccess)
-                            <li class="nav-item">
-                                <a class="nav-link d-flex align-items-center {{ str_starts_with($currentRoute, $menuItem->name) ? 'active' : '' }}" 
-                                   href="{{ $menuItem->route ? route($menuItem->route) : '#' }}">
-                                    <span class="nav-link-icon me-2">
-                                        {!! $menuItem->icon !!}
-                                    </span>
-                                    <span class="nav-link-title">{{ $menuItem->label }}</span>
-                                    @if($user->isKabid() && $menuItem->name === 'kabid.program-kerja' && $user->kategoriBiroKabid && $user->kategoriBiroKabid->count() > 0)
-                                        <span class="badge bg-blue ms-2">
-                                            {{ $user->kategoriBiroKabid->pluck('nama')->join(', ') }}
-                                        </span>
-                                    @endif
-                                </a>
-                            </li>
-                            
-                            {{-- Submenu --}}
-                            @if($menuItem->children->count() > 0)
-                                @foreach($menuItem->children as $child)
-                                    @php
+                            @php
+                                // Check if menu is active (including sub menu) - dinamis
+                                $menuIsActive = str_starts_with($currentRoute, $menuItem->name);
+                                $hasActiveChild = false;
+                                if ($menuItem->children->count() > 0) {
+                                    // Check if any child is active (dinamis untuk semua role)
+                                    foreach ($menuItem->children as $child) {
                                         $childPermission = $child->permissions->first();
                                         $childHasAccess = $childPermission && $user->hasPermission($childPermission->name);
-                                    @endphp
-                                    @if($childHasAccess)
-                                        <li class="nav-item ms-4">
-                                            <a class="nav-link d-flex align-items-center {{ str_starts_with($currentRoute, $child->name) ? 'active' : '' }}" 
-                                               href="{{ $child->route ? route($child->route) : '#' }}">
-                                                <span class="nav-link-icon me-2">
-                                                    {!! $child->icon ?? '' !!}
-                                                </span>
-                                                <span class="nav-link-title">{{ $child->label }}</span>
-                                            </a>
-                                        </li>
-                                    @endif
-                                @endforeach
-                            @endif
+                                        
+                                        if ($childHasAccess) {
+                                            if (str_starts_with($currentRoute, $child->name)) {
+                                                $hasActiveChild = true;
+                                                $menuIsActive = true;
+                                                break;
+                                            }
+                                            // For user sub menu, check query parameter (dinamis untuk semua role)
+                                            if ($menuItem->name === 'presidium.user' && str_contains($child->name, 'presidium.user.')) {
+                                                // Extract role name dari child name (dinamis)
+                                                $roleName = str_replace('presidium.user.', '', $child->name);
+                                                $requestedRoleId = request('role_id');
+                                                if ($requestedRoleId && str_starts_with($currentRoute, 'presidium.user')) {
+                                                    $requestedRole = \App\Models\Role::find($requestedRoleId);
+                                                    if ($requestedRole && $requestedRole->name === $roleName) {
+                                                        $hasActiveChild = true;
+                                                        $menuIsActive = true;
+                                                        break;
+                                                    }
+                                                }
+                                            }
+                                        }
+                                    }
+                                }
+                                
+                                // Generate unique ID for collapse
+                                $collapseId = 'submenu-' . str_replace('.', '-', $menuItem->name);
+                                $shouldShow = $hasActiveChild || $menuIsActive;
+                            @endphp
+                            <li class="nav-item">
+                                @if($menuItem->children->count() > 0)
+                                    {{-- Menu dengan sub menu - bisa di-toggle --}}
+                                    <a class="nav-link d-flex align-items-center {{ $menuIsActive ? 'active' : '' }}" 
+                                       href="#"
+                                       data-bs-toggle="collapse" 
+                                       data-bs-target="#{{ $collapseId }}"
+                                       aria-expanded="{{ $shouldShow ? 'true' : 'false' }}"
+                                       aria-controls="{{ $collapseId }}"
+                                       onclick="event.preventDefault();">
+                                        <span class="nav-link-icon me-2">
+                                            {!! $menuItem->icon !!}
+                                        </span>
+                                        <span class="nav-link-title">{{ $menuItem->label }}</span>
+                                        @if($user->isKabid() && $menuItem->name === 'kabid.program-kerja' && $user->kategoriBiroKabid && $user->kategoriBiroKabid->count() > 0)
+                                            <span class="badge bg-blue ms-2">
+                                                {{ $user->kategoriBiroKabid->pluck('nama')->join(', ') }}
+                                            </span>
+                                        @endif
+                                        <span class="nav-link-arrow ms-auto">
+                                            <svg xmlns="http://www.w3.org/2000/svg" class="icon" width="16" height="16" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
+                                                <path stroke="none" d="M0 0h24v24H0z" fill="none"/>
+                                                <path d="M9 6l6 6l-6 6" />
+                                            </svg>
+                                        </span>
+                                    </a>
+                                    {{-- Submenu dengan collapse --}}
+                                    <div class="collapse {{ $shouldShow ? 'show' : '' }}" id="{{ $collapseId }}">
+                                        <ul class="nav nav-sub">
+                                            @foreach($menuItem->children as $child)
+                                                @php
+                                                    $childPermission = $child->permissions->first();
+                                                    $childHasAccess = $childPermission && $user->hasPermission($childPermission->name);
+                                                    
+                                                    // Untuk sub menu user, tambahkan query parameter role_id (dinamis berdasarkan role)
+                                                    $childUrl = '#';
+                                                    if ($child->route && $childHasAccess) {
+                                                        if ($menuItem->name === 'presidium.user' && str_contains($child->name, 'presidium.user.')) {
+                                                            // Extract role name dari child name (presidium.user.{role_name} -> {role_name})
+                                                            $roleName = str_replace('presidium.user.', '', $child->name);
+                                                            $role = \App\Models\Role::where('name', $roleName)->first();
+                                                            if ($role) {
+                                                                // Gunakan URL dengan query parameter
+                                                                $childUrl = route($child->route) . '?role_id=' . $role->id;
+                                                            } else {
+                                                                $childUrl = route($child->route);
+                                                            }
+                                                        } else {
+                                                            $childUrl = route($child->route);
+                                                        }
+                                                    }
+                                                    
+                                                    // Check if this sub menu is active (dinamis berdasarkan role)
+                                                    $isActive = false;
+                                                    if ($childHasAccess) {
+                                                        if (str_starts_with($currentRoute, $child->name)) {
+                                                            $isActive = true;
+                                                        } elseif ($menuItem->name === 'presidium.user' && str_contains($child->name, 'presidium.user.')) {
+                                                            // Dinamis: cek berdasarkan role name dari child name
+                                                            $roleName = str_replace('presidium.user.', '', $child->name);
+                                                            $requestedRoleId = request('role_id');
+                                                            if ($requestedRoleId) {
+                                                                $requestedRole = \App\Models\Role::find($requestedRoleId);
+                                                                if ($requestedRole && $requestedRole->name === $roleName) {
+                                                                    $isActive = true;
+                                                                }
+                                                            }
+                                                        }
+                                                    }
+                                                @endphp
+                                                @if($childHasAccess)
+                                                    <li class="nav-item">
+                                                        <a class="nav-link {{ $isActive ? 'active' : '' }}" 
+                                                           href="{{ $childUrl }}">
+                                                            <span class="nav-link-title">{{ $child->label }}</span>
+                                                        </a>
+                                                    </li>
+                                                @endif
+                                            @endforeach
+                                        </ul>
+                                    </div>
+                                @else
+                                    {{-- Menu tanpa sub menu --}}
+                                    <a class="nav-link d-flex align-items-center {{ $menuIsActive ? 'active' : '' }}" 
+                                       href="{{ $menuItem->route ? route($menuItem->route) : '#' }}">
+                                        <span class="nav-link-icon me-2">
+                                            {!! $menuItem->icon !!}
+                                        </span>
+                                        <span class="nav-link-title">{{ $menuItem->label }}</span>
+                                        @if($user->isKabid() && $menuItem->name === 'kabid.program-kerja' && $user->kategoriBiroKabid && $user->kategoriBiroKabid->count() > 0)
+                                            <span class="badge bg-blue ms-2">
+                                                {{ $user->kategoriBiroKabid->pluck('nama')->join(', ') }}
+                                            </span>
+                                        @endif
+                                    </a>
+                                @endif
+                            </li>
                         @endif
                     @endforeach
                 @else
