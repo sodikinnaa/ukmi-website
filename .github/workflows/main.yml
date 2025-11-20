@@ -99,7 +99,7 @@ jobs:
             PHONES=("6288275426716")
 
             for PHONE in "${PHONES[@]}"; do
-              curl --location "https://sistemberita.my.id/chat/send/text" \
+              curl --location "https://wa.siapberkarir.id/chat/send/text" \
                 --header "accept: application/json" \
                 --header "Content-Type: application/json" \
                 --header "token: ${{ secrets.WA_TOKEN }}" \
