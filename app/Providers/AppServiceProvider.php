@@ -19,6 +19,7 @@ class AppServiceProvider extends ServiceProvider
      */
     public function boot(): void
     {
-        //
+        // Use custom pagination view
+        \Illuminate\Pagination\Paginator::defaultView('vendor.pagination.tabler');
     }
 }

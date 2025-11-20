@@ -1,0 +1,95 @@
+---
+alwaysApply: true
+---
+
+# Rule Pewarnaan Badge
+
+## Standar Pewarnaan Badge untuk Kontras Optimal
+
+Semua badge di sistem harus menggunakan warna dengan kontras tinggi untuk keterbacaan yang optimal. Gunakan CSS berikut di layout utama:
+
+```css
+/* Perbaikan kontras badge untuk keterbacaan yang lebih baik */
+.badge {
+    font-weight: 600;
+    padding: 0.35em 0.65em;
+    letter-spacing: 0.02em;
+}
+
+/* Badge biru dengan kontras lebih baik */
+.badge.bg-blue {
+    background-color: #206bc4 !important;
+    color: #ffffff !important;
+    text-shadow: 0 1px 1px rgba(0, 0, 0, 0.1);
+}
+
+/* Badge info dengan kontras lebih baik */
+.badge.bg-info {
+    background-color: #4299e1 !important;
+    color: #ffffff !important;
+    text-shadow: 0 1px 1px rgba(0, 0, 0, 0.1);
+}
+
+/* Badge hijau dengan kontras lebih baik */
+.badge.bg-green,
+.badge.bg-success {
+    background-color: #2fb344 !important;
+    color: #ffffff !important;
+    text-shadow: 0 1px 1px rgba(0, 0, 0, 0.1);
+}
+
+/* Badge merah dengan kontras lebih baik */
+.badge.bg-red,
+.badge.bg-danger {
+    background-color: #d63939 !important;
+    color: #ffffff !important;
+    text-shadow: 0 1px 1px rgba(0, 0, 0, 0.1);
+}
+
+/* Badge kuning/orange dengan kontras lebih baik */
+.badge.bg-yellow,
+.badge.bg-warning {
+    background-color: #f59f00 !important;
+    color: #ffffff !important;
+    text-shadow: 0 1px 1px rgba(0, 0, 0, 0.1);
+}
+
+.badge.bg-orange {
+    background-color: #fd7e14 !important;
+    color: #ffffff !important;
+    text-shadow: 0 1px 1px rgba(0, 0, 0, 0.1);
+}
+
+/* Badge purple dengan kontras lebih baik */
+.badge.bg-purple {
+    background-color: #ae3ec9 !important;
+    color: #ffffff !important;
+    text-shadow: 0 1px 1px rgba(0, 0, 0, 0.1);
+}
+
+/* Badge secondary dengan kontras lebih baik */
+.badge.bg-secondary {
+    background-color: #6c757d !important;
+    color: #ffffff !important;
+    text-shadow: 0 1px 1px rgba(0, 0, 0, 0.1);
+}
+```
+
+## Aturan Penggunaan Badge
+
+1. **Selalu gunakan text putih** pada semua badge untuk kontras maksimal
+2. **Gunakan text-shadow** untuk meningkatkan keterbacaan
+3. **Font weight 600** untuk membuat teks lebih tebal dan mudah dibaca
+4. **Warna background harus gelap** dengan kontras tinggi terhadap text putih
+5. **Jangan gunakan warna terang** yang membuat text sulit dibaca
+
+## Warna Badge yang Disarankan
+
+- **Biru (bg-blue)**: `#206bc4` - Untuk kategori, label umum
+- **Info (bg-info)**: `#4299e1` - Untuk informasi tambahan
+- **Hijau (bg-green/success)**: `#2fb344` - Untuk status aktif, sukses
+- **Merah (bg-red/danger)**: `#d63939` - Untuk status tidak aktif, error
+- **Kuning (bg-yellow/warning)**: `#f59f00` - Untuk peringatan
+- **Orange (bg-orange)**: `#fd7e14` - Untuk status khusus
+- **Purple (bg-purple)**: `#ae3ec9` - Untuk kategori khusus
+- **Secondary (bg-secondary)**: `#6c757d` - Untuk status netral

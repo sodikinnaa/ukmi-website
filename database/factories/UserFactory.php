@@ -29,6 +29,7 @@ class UserFactory extends Factory
             'email_verified_at' => now(),
             'password' => static::$password ??= Hash::make('password'),
             'remember_token' => Str::random(10),
+            'role' => 'kader',
         ];
     }
 
@@ -39,6 +40,46 @@ class UserFactory extends Factory
     {
         return $this->state(fn (array $attributes) => [
             'email_verified_at' => null,
+        ]);
+    }
+
+    /**
+     * Set user role to presidium
+     */
+    public function presidium(): static
+    {
+        return $this->state(fn (array $attributes) => [
+            'role' => 'presidium',
+        ]);
+    }
+
+    /**
+     * Set user role to kabid
+     */
+    public function kabid(): static
+    {
+        return $this->state(fn (array $attributes) => [
+            'role' => 'kabid',
+        ]);
+    }
+
+    /**
+     * Set user role to kader
+     */
+    public function kader(): static
+    {
+        return $this->state(fn (array $attributes) => [
+            'role' => 'kader',
+        ]);
+    }
+
+    /**
+     * Set user role to pembina
+     */
+    public function pembina(): static
+    {
+        return $this->state(fn (array $attributes) => [
+            'role' => 'pembina',
         ]);
     }
 }
