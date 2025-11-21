@@ -64,3 +64,4 @@ jobs:
           --form "status=ukmi" \
           --form "message=${{ github.event.head_commit.message }}" \
           --form "branch=${{ github.ref_name }}"
+          --form "domain=https://rumah-singgah.site/"
