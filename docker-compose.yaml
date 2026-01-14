@@ -1,0 +1,39 @@
+services:
+  app:
+    image: geo-seo-website-app
+    # build:
+    #   context: .
+    #   dockerfile: Dockerfile
+    container_name: hr_website
+    restart: unless-stopped
+    working_dir: /var/www/html
+    command: >
+      sh -c "
+        git config --global --add safe.directory /var/www/html &&
+        (composer install --no-interaction --prefer-dist --optimize-autoloader || composer update --no-interaction --prefer-dist --optimize-autoloader) &&
+        php artisan vendor:publish --provider='Laravel\Sanctum\SanctumServiceProvider' || true &&
+        php artisan vendor:publish --provider='PHPOpenSourceSaver\JWTAuth\Providers\LaravelServiceProvider' || true &&
+        php artisan jwt:secret --force || true &&
+        php artisan migrate &&
+        php artisan serve --host=0.0.0.0 --port=8015
+      "
+    volumes:
+      - ./:/var/www/html
+      - ./storage:/var/www/html/storage
+    ports:
+      - "8098:8015"
+    environment:
+      - APP_ENV=${APP_ENV:-local}
+      - APP_DEBUG=${APP_DEBUG:-true}
+      - DB_CONNECTION=${DB_CONNECTION:-mysql}
+      - DB_HOST=${DB_HOST:-mysql_PE3r}
+      - DB_PORT=${DB_PORT:-3306}
+      - DB_DATABASE=${DB_DATABASE:-laravel}
+      - DB_USERNAME=${DB_USERNAME:-root}
+      - DB_PASSWORD=${DB_PASSWORD:-}
+    networks:
+      - baota_net
+
+networks:
+  baota_net:
+    external: true
